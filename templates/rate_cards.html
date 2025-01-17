@@ -1,0 +1,96 @@
+<div class="row">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <span class="badge bg-success">USD</span> 달러 환율
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="card-text mb-0">{{ "{:,.2f}".format(usd_rate.current_rate) if usd_rate else '-' }}원</h3>
+                    <div class="text-end">
+                        <span class="{% if usd_rate and usd_rate.change_amount > 0 %}text-primary{% elif usd_rate and usd_rate.change_amount < 0 %}text-danger{% endif %}">
+                            {% if usd_rate %}
+                            {{ "{:+,.2f}".format(usd_rate.change_amount) }}원
+                            ({{ "{:+.2f}".format(usd_rate.change_percent) }}%)
+                            {% else %}
+                            -
+                            {% endif %}
+                        </span>
+                        <div class="small text-muted">{{ usd_rate.timestamp if usd_rate else '-' }}</div>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted mb-1">보유금액</div>
+                        <h5 class="mb-0">
+                            <i class="bi bi-currency-dollar"></i>
+                            {{ "{:,.2f}".format(usd_holding.holding_amount) }}
+                            <small class="text-muted">({{ "{:,.0f}".format(usd_holding.holding_krw) }}원)</small>
+                        </h5>
+                        <small class="text-muted">평균단가: {{ "{:,.2f}".format(usd_holding.avg_rate) }}원</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted mb-1">현재가치</div>
+                        <h5 class="mb-0 {% if usd_current_value.profit_amount > 0 %}text-primary{% elif usd_current_value.profit_amount < 0 %}text-danger{% endif %}">
+                            {{ "{:,.0f}".format(usd_current_value.current_value) }}원
+                            <small>({{ "{:+.1f}".format(usd_current_value.profit_rate) }}%)</small>
+                        </h5>
+                        <small class="{% if usd_current_value.profit_amount > 0 %}text-primary{% elif usd_current_value.profit_amount < 0 %}text-danger{% endif %}">
+                            {{ "{:+,.0f}".format(usd_current_value.profit_amount) }}원
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <span class="badge bg-danger">JPY</span> 엔화 환율
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="card-text mb-0">{{ "{:,.2f}".format(jpy_rate.current_rate) if jpy_rate else '-' }}원</h3>
+                    <div class="text-end">
+                        <span class="{% if jpy_rate and jpy_rate.change_amount > 0 %}text-primary{% elif jpy_rate and jpy_rate.change_amount < 0 %}text-danger{% endif %}">
+                            {% if jpy_rate %}
+                            {{ "{:+,.2f}".format(jpy_rate.change_amount) }}원
+                            ({{ "{:+.2f}".format(jpy_rate.change_percent) }}%)
+                            {% else %}
+                            -
+                            {% endif %}
+                        </span>
+                        <div class="small text-muted">{{ jpy_rate.timestamp if jpy_rate else '-' }}</div>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted mb-1">보유금액</div>
+                        <h5 class="mb-0">
+                            <i class="bi bi-currency-yen"></i>
+                            {{ "{:,.2f}".format(jpy_holding.holding_amount) }}
+                            <small class="text-muted">({{ "{:,.0f}".format(jpy_holding.holding_krw) }}원)</small>
+                        </h5>
+                        <small class="text-muted">평균단가: {{ "{:,.2f}".format(jpy_holding.avg_rate) }}원</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted mb-1">현재가치</div>
+                        <h5 class="mb-0 {% if jpy_current_value.profit_amount > 0 %}text-primary{% elif jpy_current_value.profit_amount < 0 %}text-danger{% endif %}">
+                            {{ "{:,.0f}".format(jpy_current_value.current_value) }}원
+                            <small>({{ "{:+.1f}".format(jpy_current_value.profit_rate) }}%)</small>
+                        </h5>
+                        <small class="{% if jpy_current_value.profit_amount > 0 %}text-primary{% elif jpy_current_value.profit_amount < 0 %}text-danger{% endif %}">
+                            {{ "{:+,.0f}".format(jpy_current_value.profit_amount) }}원
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

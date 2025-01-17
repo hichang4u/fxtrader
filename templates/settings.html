@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">통화별 설정</h2>
+    
+    <form method="POST">
+        <!-- USD 설정 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <span class="badge bg-success">USD</span> 달러 설정
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- 매도 예정 환율 상승폭 -->
+                <div class="mb-3">
+                    <label class="form-label">매도 예정 환율 상승폭</label>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="usd_rate_increment_1" name="usd_rate_increment_1" min="1" step="1" value="{{ usd_settings.rate_increments[0] }}" required>
+                                <span class="input-group-text">원 (1차)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="usd_rate_increment_2" name="usd_rate_increment_2" min="1" step="1" value="{{ usd_settings.rate_increments[1] }}" required>
+                                <span class="input-group-text">원 (2차)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="usd_rate_increment_3" name="usd_rate_increment_3" min="1" step="1" value="{{ usd_settings.rate_increments[2] }}" required>
+                                <span class="input-group-text">원 (3차)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 손절 환율 하락폭 -->
+                <div class="mb-3">
+                    <label class="form-label">손절 환율 하락폭</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="usd_stop_loss_gap" name="usd_stop_loss_gap" min="1" step="1" value="{{ usd_settings.stop_loss_gap }}" required>
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+                <!-- 기본 매수 금액 -->
+                <div class="mb-3">
+                    <label class="form-label">기본 매수 금액</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="usd_default_amount" name="usd_default_amount" min="1" step="1" value="{{ usd_settings.default_amount }}" required>
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+                <!-- 매수 예정 하락폭 -->
+                <div class="mb-3">
+                    <label class="form-label">매수 예정 하락폭</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="usd_buy_drop_threshold" name="usd_buy_drop_threshold" min="1" step="1" value="{{ usd_settings.buy_drop_threshold }}" required>
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+                <!-- 매수 예정 환율 -->
+                <div class="mb-3">
+                    <label class="form-label">매수 예정 환율</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="usd_planned_buy_rate" name="usd_planned_buy_rate" min="1" step="1" 
+                            value="{% set usd_buys = trades|selectattr('currency', 'equalto', 'USD')|selectattr('type', 'equalto', '매수')|list %}
+                                   {%- if usd_buys %}
+                                       {{- ((usd_buys|last).rate - usd_settings.buy_drop_threshold)|int -}}
+                                   {%- elif usd_rate %}
+                                       {{- (usd_rate.current_rate - usd_settings.buy_drop_threshold)|int -}}
+                                   {%- else %}
+                                       {{- "" -}}
+                                   {%- endif %}" 
+                            required>
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JPY 설정 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <span class="badge bg-danger">JPY</span> 엔화 설정
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- 매도 예정 환율 상승폭 -->
+                <div class="mb-3">
+                    <label class="form-label">매도 예정 환율 상승폭</label>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="jpy_rate_increment_1" name="jpy_rate_increment_1" min="1" step="1" value="{{ jpy_settings.rate_increments[0] }}" required>
+                                <span class="input-group-text">원 (1차)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="jpy_rate_increment_2" name="jpy_rate_increment_2" min="1" step="1" value="{{ jpy_settings.rate_increments[1] }}" required>
+                                <span class="input-group-text">원 (2차)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="jpy_rate_increment_3" name="jpy_rate_increment_3" min="1" step="1" value="{{ jpy_settings.rate_increments[2] }}" required>
+                                <span class="input-group-text">원 (3차)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 손절 환율 하락폭 -->
+                <div class="mb-3">
+                    <label class="form-label">손절 환율 하락폭</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="jpy_stop_loss_gap" name="jpy_stop_loss_gap" min="1" step="1" value="{{ jpy_settings.stop_loss_gap }}" required>
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+                <!-- 기본 매수 금액 -->
+                <div class="mb-3">
+                    <label class="form-label">기본 매수 금액</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="jpy_default_amount" name="jpy_default_amount" min="1" step="1" value="{{ jpy_settings.default_amount }}" required>
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+                <!-- 매수 예정 하락폭 -->
+                <div class="mb-3">
+                    <label class="form-label">매수 예정 하락폭</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="jpy_buy_drop_threshold" name="jpy_buy_drop_threshold" min="1" step="1" value="{{ jpy_settings.buy_drop_threshold }}" required>
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+                <!-- JPY 매수 예정 환율 -->
+                <div class="mb-3">
+                    <label class="form-label">매수 예정 환율</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="jpy_planned_buy_rate" name="jpy_planned_buy_rate" min="1" step="1" 
+                            value="{% set jpy_buys = trades|selectattr('currency', 'equalto', 'JPY')|selectattr('type', 'equalto', '매수')|list %}
+                                   {%- if jpy_buys %}
+                                       {{- ((jpy_buys|last).rate - jpy_settings.buy_drop_threshold)|int -}}
+                                   {%- elif jpy_rate %}
+                                       {{- (jpy_rate.current_rate - jpy_settings.buy_drop_threshold)|int -}}
+                                   {%- else %}
+                                       {{- "" -}}
+                                   {%- endif %}" 
+                            required>
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 저장 버튼 -->
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">저장</button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

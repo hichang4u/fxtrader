@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- 상단 카드 섹션 -->
+    <div class="row mb-4">
+        <!-- 환율 정보 -->
+        <div class="col-md-8">
+            <div id="rate-cards">
+                {% include 'rate_cards.html' %}
+            </div>
+        </div>
+        <!-- 총 실현 손익 -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <span class="badge bg-primary">총 실현 손익</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-text mb-0 {% if usd_profit + jpy_profit > 0 %}text-primary{% elif usd_profit + jpy_profit < 0 %}text-danger{% endif %}">
+                            {{ "{:+,.0f}".format(usd_profit + jpy_profit) }}원
+                        </h3>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>USD:</span>
+                        <span class="{% if usd_profit > 0 %}text-primary{% elif usd_profit < 0 %}text-danger{% endif %}">
+                            {{ "{:+,.0f}".format(usd_profit) }}원
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>JPY:</span>
+                        <span class="{% if jpy_profit > 0 %}text-primary{% elif jpy_profit < 0 %}text-danger{% endif %}">
+                            {{ "{:+,.0f}".format(jpy_profit) }}원
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 탭 네비게이션 -->
+    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="trades-tab" data-bs-toggle="tab" data-bs-target="#trades" type="button" role="tab">
+                실제 거래
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="planned-tab" data-bs-toggle="tab" data-bs-target="#planned" type="button" role="tab">
+                예정 거래
+            </button>
+        </li>
+    </ul>
+
+    <!-- 탭 컨텐츠 -->
+    <div class="tab-content" id="myTabContent">
+        <!-- 실제 거래 탭 -->
+        <div class="tab-pane fade show active" id="trades" role="tabpanel">
+            {% if filtered_sells_for %}
+            <div class="alert alert-info mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><strong>{{ filtered_sells_for }}</strong> 매수 건의 매도 거래만 표시하고 있습니다.</span>
+                    <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-info">전체 보기</a>
+                </div>
+            </div>
+            {% endif %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>날짜</th>
+                            <th>유형</th>
+                            <th>통화</th>
+                            <th class="text-end">환율</th>
+                            <th class="text-end">원화금액</th>
+                            <th class="text-end">외화금액</th>
+                            <th class="text-end">손익</th>
+                            <th>비고</th>
+                            <th>연관ID</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trade in trades %}
+                        <tr>
+                            <td>
+                                {% if trade.type == '매수' %}
+                                <a href="{{ url_for('filter_trades', buy_id=trade.id) }}" class="text-decoration-none">{{ trade.id }}</a>
+                                {% else %}
+                                {{ trade.id }}
+                                {% endif %}
+                            </td>
+                            <td>{{ trade.date }}</td>
+                            <td>
+                                <span class="badge {% if trade.type == '매수' %}bg-primary{% else %}bg-danger{% endif %}">
+                                    {{ trade.type }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if trade.currency == 'USD' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ trade.currency }}
+                                </span>
+                            </td>
+                            <td class="text-end">₩ {{ "{:,.2f}".format(trade.rate) }}</td>
+                            <td class="text-end">₩ {{ "{:,.2f}".format(trade.krw_amount) }}</td>
+                            <td class="text-end">
+                                <i class="bi {% if trade.currency == 'USD' %}bi-currency-dollar{% else %}bi-currency-yen{% endif %}"></i>
+                                {{ "{:,.2f}".format(trade.foreign_amount) }}
+                            </td>
+                            <td class="text-end {% if trade.profit > 0 %}text-primary{% elif trade.profit < 0 %}text-danger{% endif %}">
+                                ₩ {% if trade.profit > 0 %}+{% endif %}{{ "{:,.2f}".format(trade.profit) }}
+                            </td>
+                            <td>{{ trade.note }}</td>
+                            <td>{{ trade.related_id }}</td>
+                            <td>
+                                {% if trade.type in ['매수', '매도'] %}
+                                <div class="btn-group gap-1">
+                                    <a href="{{ url_for('edit_trade', trade_id=trade.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if trade.type == '매수' %}
+                                    <a href="{{ url_for('filter_sells', buy_id=trade.id) }}" class="btn btn-sm btn-outline-secondary" title="이 매수와 관련된 매도 거래 보기">
+                                        <i class="bi bi-search"></i>
+                                    </a>
+                                    {% endif %}
+                                    <form action="{{ url_for('delete_trade', trade_id=trade.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                                        {% if trade.type == '매수' and trade.id in trades_with_sells %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" disabled title="연관된 매도 거래가 있어 삭제할 수 없습니다">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        {% else %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 예정 거래 탭 -->
+        <div class="tab-pane fade" id="planned" role="tabpanel">
+            {% if selected_buy_id %}
+            <div class="alert alert-info mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><strong>{{ selected_buy_id }}</strong> 매수 건의 예정 거래만 표시하고 있습니다.</span>
+                    <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-info">전체 보기</a>
+                </div>
+            </div>
+            {% endif %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>유형</th>
+                            <th>통화</th>
+                            <th class="text-end">환율</th>
+                            <th class="text-end">원화금액</th>
+                            <th class="text-end">외화금액</th>
+                            <th class="text-end">예상손익</th>
+                            <th>연관ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trade in planned_trades %}
+                        <tr>
+                            <td>{{ trade.id }}</td>
+                            <td>
+                                <span class="badge {% if '매도' in trade.type %}bg-primary{% else %}bg-danger{% endif %}">
+                                    {{ trade.type }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if trade.currency == 'USD' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ trade.currency }}
+                                </span>
+                            </td>
+                            <td class="text-end">₩ {{ "{:,.2f}".format(trade.rate) }}</td>
+                            <td class="text-end">₩ {{ "{:,.2f}".format(trade.krw_amount) }}</td>
+                            <td class="text-end">
+                                <i class="bi {% if trade.currency == 'USD' %}bi-currency-dollar{% else %}bi-currency-yen{% endif %}"></i>
+                                {{ "{:,.2f}".format(trade.foreign_amount) }}
+                            </td>
+                            <td class="text-end {% if trade.profit > 0 %}text-primary{% elif trade.profit < 0 %}text-danger{% endif %}">
+                                ₩ {% if trade.profit > 0 %}+{% endif %}{{ "{:,.2f}".format(trade.profit) }}
+                            </td>
+                            <td>{{ trade.related_id }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 환율 정보 자동 갱신 스크립트 -->
+<script>
+    function updateRateCards() {
+        console.log('환율 정보 갱신 시도:', new Date().toLocaleTimeString());
+        
+        fetch('/api/rate_cards?' + new Date().getTime() + '&update=true', {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                const rateCards = document.getElementById('rate-cards');
+                if (!rateCards) {
+                    throw new Error('rate-cards element not found');
+                }
+                rateCards.innerHTML = html;
+                console.log('환율 정보 갱신 성공');
+            })
+            .catch(error => {
+                console.error('환율 정보 갱신 중 오류:', error);
+            });
+    }
+
+    // 페이지 로드 시 즉시 한 번 실행
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('초기 환율 정보 로드');
+        updateRateCards();
+        
+        // 10초마다 환율 정보 갱신
+        const updateInterval = setInterval(updateRateCards, 10000);
+
+        // 페이지 언로드 시 인터벌 정리
+        window.addEventListener('unload', function() {
+            clearInterval(updateInterval);
+        });
+    });
+</script>
+
+{% if selected_buy_id %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 예정 거래 탭 활성화
+        var plannedTab = document.getElementById('planned-tab');
+        var plannedContent = document.getElementById('planned');
+        var tradesTab = document.getElementById('trades-tab');
+        var tradesContent = document.getElementById('trades');
+        
+        plannedTab.classList.add('active');
+        plannedContent.classList.add('show', 'active');
+        tradesTab.classList.remove('active');
+        tradesContent.classList.remove('show', 'active');
+    });
+</script>
+{% endif %}
+{% endblock %} 

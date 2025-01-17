@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>매도 주문</h2>
+<form method="POST" class="col-md-6">
+    <div class="mb-3">
+        <label for="date" class="form-label">거래 날짜</label>
+        <input type="date" class="form-control" id="date" name="date" value="{{ today }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="buy_id" class="form-label">매수 ID</label>
+        <select class="form-select" id="buy_id" name="buy_id" required>
+            <option value="">매수 주문 선택</option>
+            {% for trade in buy_trades %}
+            <option value="{{ trade.id }}">{{ trade.id }} ({{ "{:,.2f}".format(trade.krw_amount) }}원)</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="rate" class="form-label">환율</label>
+        <input type="number" step="0.01" class="form-control" id="rate" name="rate" required>
+    </div>
+    <div class="mb-3">
+        <label for="ratio" class="form-label">매도 비율 (0.3 = 30%)</label>
+        <input type="number" step="0.01" min="0" max="1" class="form-control" id="ratio" name="ratio" required>
+    </div>
+    <div class="mb-3">
+        <label for="note" class="form-label">비고</label>
+        <input type="text" class="form-control" id="note" name="note">
+    </div>
+    <button type="submit" class="btn btn-primary">매도 주문 생성</button>
+</form>
+{% endblock %} 

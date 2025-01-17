@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>거래 수정</h2>
+<form method="POST" class="col-md-6">
+    <div class="mb-3">
+        <label for="date" class="form-label">거래 날짜</label>
+        <input type="date" class="form-control" id="date" name="date" value="{{ trade.date }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="krw_amount" class="form-label">원화 금액</label>
+        <input type="number" step="0.01" class="form-control" id="krw_amount" name="krw_amount" value="{{ trade.krw_amount }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="rate" class="form-label">환율</label>
+        <input type="number" step="0.01" class="form-control" id="rate" name="rate" value="{{ trade.rate }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="note" class="form-label">비고</label>
+        <input type="text" class="form-control" id="note" name="note" value="{{ trade.note }}">
+    </div>
+    <button type="submit" class="btn btn-primary">수정</button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">취소</a>
+</form>
+{% endblock %} 

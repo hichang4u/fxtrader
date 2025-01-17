@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>매수 주문</h2>
+<form method="POST" class="col-md-6">
+    <div class="mb-3">
+        <label for="date" class="form-label">거래 날짜</label>
+        <input type="date" class="form-control" id="date" name="date" value="{{ today }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="currency" class="form-label">거래 통화</label>
+        <select class="form-select" id="currency" name="currency" required>
+            <option value="USD">USD (미국 달러)</option>
+            <option value="JPY">JPY (일본 엔)</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="krw_amount" class="form-label">원화 금액</label>
+        <input type="number" step="0.01" class="form-control" id="krw_amount" name="krw_amount" value="{{ default_amount }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="rate" class="form-label">환율</label>
+        <input type="number" step="0.01" class="form-control" id="rate" name="rate" required>
+    </div>
+    <div class="mb-3">
+        <label for="note" class="form-label">비고</label>
+        <input type="text" class="form-control" id="note" name="note">
+    </div>
+    <button type="submit" class="btn btn-primary">매수 주문 생성</button>
+</form>
+
+<script>
+// 통화별 환율 입력 단위 조정
+document.getElementById('currency').addEventListener('change', function() {
+    const rateInput = document.getElementById('rate');
+    if (this.value === 'JPY') {
+        rateInput.step = '0.0001';  // 엔화는 소수점 4자리까지
+    } else {
+        rateInput.step = '0.01';    // 달러는 소수점 2자리까지
+    }
+});
+</script>
+{% endblock %} 
