@@ -13,15 +13,19 @@ class CurrencySettings:
     stop_loss_gap: int         # 손절 환율 하락폭
     default_amount: int        # 기본 매수 금액
     buy_drop_threshold: int    # 매수 예정 하락폭
-    planned_buy_amount: int   # 매수 예정 금액
+    planned_buy_amount: int    # 매수 예정 금액
+    planned_buy_rate: int      # 매수 예정 환율
 
-    def __init__(self, currency: str = '', rate_increments=None, stop_loss_gap=20, default_amount=100000, buy_drop_threshold=5, planned_buy_amount=100000):
+    def __init__(self, currency: str = '', rate_increments=None, stop_loss_gap=20, 
+                 default_amount=100000, buy_drop_threshold=5, planned_buy_amount=100000,
+                 planned_buy_rate=0):
         self.currency = currency
         self.rate_increments = rate_increments or [10, 20, 30]
         self.stop_loss_gap = stop_loss_gap
         self.default_amount = default_amount
         self.buy_drop_threshold = buy_drop_threshold
         self.planned_buy_amount = planned_buy_amount
+        self.planned_buy_rate = int(planned_buy_rate)  # float를 int로 변환
 
     def to_dict(self):
         return {
@@ -30,7 +34,8 @@ class CurrencySettings:
             'stop_loss_gap': self.stop_loss_gap,
             'default_amount': self.default_amount,
             'buy_drop_threshold': self.buy_drop_threshold,
-            'planned_buy_amount': self.planned_buy_amount
+            'planned_buy_amount': self.planned_buy_amount,
+            'planned_buy_rate': self.planned_buy_rate
         }
 
     @classmethod
@@ -41,7 +46,8 @@ class CurrencySettings:
             stop_loss_gap=data.get('stop_loss_gap', 20),
             default_amount=data.get('default_amount', 100000),
             buy_drop_threshold=data.get('buy_drop_threshold', 5 if data['currency'] == 'USD' else 3),
-            planned_buy_amount=data.get('planned_buy_amount', 100000)
+            planned_buy_amount=data.get('planned_buy_amount', 100000),
+            planned_buy_rate=data.get('planned_buy_rate', 0)
         )
 
 @dataclass
@@ -162,14 +168,16 @@ class TradingSystem:
                 for currency, settings in self.settings.items()
             }, f, indent=2)
 
-    def update_currency_settings(self, currency: str, rate_increments: List[int], stop_loss_gap: int, default_amount: int, buy_drop_threshold: int):
+    def update_currency_settings(self, currency: str, rate_increments: List[int], stop_loss_gap: int, 
+                                default_amount: int, buy_drop_threshold: int, planned_buy_rate: float):
         """통화별 설정을 업데이트합니다."""
         self.settings[currency] = CurrencySettings(
             currency=currency,
             rate_increments=rate_increments,
             stop_loss_gap=stop_loss_gap,
             default_amount=default_amount,
-            buy_drop_threshold=buy_drop_threshold
+            buy_drop_threshold=buy_drop_threshold,
+            planned_buy_rate=int(planned_buy_rate)
         )
         # 매수 예정 하락폭 설정을 RateMonitor에도 전달
         self.rate_monitor.buy_drop_thresholds[currency] = buy_drop_threshold

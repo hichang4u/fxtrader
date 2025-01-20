@@ -65,18 +65,20 @@
                 <div class="mb-3">
                     <label class="form-label">매수 예정 환율</label>
                     <div class="input-group">
-                        <input type="number" class="form-control" id="usd_planned_buy_rate" name="usd_planned_buy_rate" min="1" step="1" 
-                            value="{% set usd_buys = trades|selectattr('currency', 'equalto', 'USD')|selectattr('type', 'equalto', '매수')|list %}
-                                   {%- if usd_buys %}
-                                       {{- ((usd_buys|last).rate - usd_settings.buy_drop_threshold)|int -}}
-                                   {%- elif usd_rate %}
-                                       {{- (usd_rate.current_rate - usd_settings.buy_drop_threshold)|int -}}
-                                   {%- else %}
-                                       {{- "" -}}
-                                   {%- endif %}" 
-                            required>
+                        <input type="number" class="form-control" id="usd_planned_buy_rate" name="usd_planned_buy_rate" 
+                            min="1" step="1" value="{{ usd_settings.planned_buy_rate }}" required>
                         <span class="input-group-text">원</span>
                     </div>
+                    {% if usd_rate %}
+                    <small class="text-muted">
+                        현재 환율: {{ "{:,.0f}".format(usd_rate.current_rate) }}원
+                        {% if usd_settings.planned_buy_rate > 0 %}
+                        <span class="{% if usd_settings.planned_buy_rate < usd_rate.current_rate %}text-primary{% else %}text-danger{% endif %}">
+                            ({{ "{:+,.0f}".format(usd_settings.planned_buy_rate - usd_rate.current_rate) }}원)
+                        </span>
+                        {% endif %}
+                    </small>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -141,18 +143,20 @@
                 <div class="mb-3">
                     <label class="form-label">매수 예정 환율</label>
                     <div class="input-group">
-                        <input type="number" class="form-control" id="jpy_planned_buy_rate" name="jpy_planned_buy_rate" min="1" step="1" 
-                            value="{% set jpy_buys = trades|selectattr('currency', 'equalto', 'JPY')|selectattr('type', 'equalto', '매수')|list %}
-                                   {%- if jpy_buys %}
-                                       {{- ((jpy_buys|last).rate - jpy_settings.buy_drop_threshold)|int -}}
-                                   {%- elif jpy_rate %}
-                                       {{- (jpy_rate.current_rate - jpy_settings.buy_drop_threshold)|int -}}
-                                   {%- else %}
-                                       {{- "" -}}
-                                   {%- endif %}" 
-                            required>
+                        <input type="number" class="form-control" id="jpy_planned_buy_rate" name="jpy_planned_buy_rate" 
+                            min="1" step="1" value="{{ jpy_settings.planned_buy_rate }}" required>
                         <span class="input-group-text">원</span>
                     </div>
+                    {% if jpy_rate %}
+                    <small class="text-muted">
+                        현재 환율: {{ "{:,.0f}".format(jpy_rate.current_rate) }}원
+                        {% if jpy_settings.planned_buy_rate > 0 %}
+                        <span class="{% if jpy_settings.planned_buy_rate < jpy_rate.current_rate %}text-primary{% else %}text-danger{% endif %}">
+                            ({{ "{:+,.0f}".format(jpy_settings.planned_buy_rate - jpy_rate.current_rate) }}원)
+                        </span>
+                        {% endif %}
+                    </small>
+                    {% endif %}
                 </div>
             </div>
         </div>

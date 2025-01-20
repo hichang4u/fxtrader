@@ -56,6 +56,52 @@ def index():
                          usd_profit=usd_profit,
                          jpy_profit=jpy_profit)
 
+@app.route('/planned')
+def planned_trades_summary():
+    """예정 거래 요약 페이지"""
+    planned_trades = trading_system.get_planned_trades()
+    
+    # 환율 정보 가져오기
+    usd_rate = trading_system.rate_monitor.get_current_rate('USD')
+    jpy_rate = trading_system.rate_monitor.get_current_rate('JPY')
+    
+    # 통화별 설정 가져오기
+    usd_settings = trading_system.get_currency_settings('USD')
+    jpy_settings = trading_system.get_currency_settings('JPY')
+    
+    # USD 매수 예정 거래 생성
+    if usd_settings.planned_buy_rate > 0:
+        usd_planned_buy = {
+            'currency': 'USD',
+            'type': '매수예정',
+            'rate': usd_settings.planned_buy_rate,
+            'krw_amount': usd_settings.default_amount,
+            'foreign_amount': round(usd_settings.default_amount / usd_settings.planned_buy_rate, 2),
+            'profit': 0,
+            'related_id': '',
+            'note': f'설정된 매수 예정 환율'
+        }
+        planned_trades.append(usd_planned_buy)
+    
+    # JPY 매수 예정 거래 생성
+    if jpy_settings.planned_buy_rate > 0:
+        jpy_planned_buy = {
+            'currency': 'JPY',
+            'type': '매수예정',
+            'rate': jpy_settings.planned_buy_rate,
+            'krw_amount': jpy_settings.default_amount,
+            'foreign_amount': round(jpy_settings.default_amount / jpy_settings.planned_buy_rate, 2),
+            'profit': 0,
+            'related_id': '',
+            'note': f'설정된 매수 예정 환율'
+        }
+        planned_trades.append(jpy_planned_buy)
+    
+    return render_template('planned_trades.html', 
+                         planned_trades=planned_trades,
+                         usd_rate=usd_rate,
+                         jpy_rate=jpy_rate)
+
 @app.route('/filter/<buy_id>')
 def filter_trades(buy_id):
     actual_trades = [t for t in trading_system.get_all_trades() if t.type in ['매수', '매도']]
@@ -282,7 +328,8 @@ def save_settings():
         ],
         'stop_loss_gap': int(request.form['usd_stop_loss_gap']),
         'default_amount': int(request.form['usd_default_amount']),
-        'buy_drop_threshold': int(request.form['usd_buy_drop_threshold'])
+        'buy_drop_threshold': int(request.form['usd_buy_drop_threshold']),
+        'planned_buy_rate': int(float(request.form['usd_planned_buy_rate']))
     }
     
     # JPY 설정 저장
@@ -294,7 +341,8 @@ def save_settings():
         ],
         'stop_loss_gap': int(request.form['jpy_stop_loss_gap']),
         'default_amount': int(request.form['jpy_default_amount']),
-        'buy_drop_threshold': int(request.form['jpy_buy_drop_threshold'])
+        'buy_drop_threshold': int(request.form['jpy_buy_drop_threshold']),
+        'planned_buy_rate': int(float(request.form['jpy_planned_buy_rate']))
     }
     
     # 설정 업데이트
